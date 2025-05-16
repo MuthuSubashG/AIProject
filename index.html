@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DiVAS Voucher Bot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="chat-box" id="chatBox">
+        <div class="message bot">Hi! I'm DiVAS Voucher Bot 💡<br>Type something like:<br>'What is the status of 23_01Aug2024_00149?' or<br>'Tell me when voucher 23_01Aug2024_00154 was created?'</div>
+    </div>
+
+    <form class="chat-input-form" id="chatForm">
+        <input type="text" id="userInput" placeholder="Ask something..." autocomplete="off" required>
+        <button type="submit">Send</button>
+    </form>
+</div>
+
+<script>
+document.getElementById("chatForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+    const input = document.getElementById("userInput");
+    const userMsg = input.value;
+    if (!userMsg.trim()) return;
+
+    const chatBox = document.getElementById("chatBox");
+
+    // Add user message
+    const userDiv = document.createElement("div");
+    userDiv.className = "message user";
+    userDiv.textContent = userMsg;
+    chatBox.appendChild(userDiv);
+
+    input.value = "";
+
+    // Fetch bot response
+    fetch("/get", {
+        method: "POST",
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: "msg=" + encodeURIComponent(userMsg)
+    })
+    .then(res => res.json())
+    .then(data => {
+        const botDiv = document.createElement("div");
+        botDiv.className = "message bot";
+        botDiv.innerHTML = data.response.replace(/\n/g, "<br>");
+        chatBox.appendChild(botDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    });
+});
+</script>
+
+</body>
+</html>
